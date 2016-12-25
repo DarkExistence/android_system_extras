@@ -45,9 +45,6 @@
 
 int (*f2fs_format_device_dl)(void);
 void (*f2fs_init_configuration_dl)(struct f2fs_configuration *);
-void (*flush_sparse_buffs_dl)(void);
-void (*init_sparse_file_dl)(unsigned int, int64_t);
-void (*finalize_sparse_file_dl)(int);
 struct f2fs_configuration *f2fs_config;
 
 int f2fs_format_device(void) {
@@ -58,34 +55,12 @@ void f2fs_init_configuration(struct f2fs_configuration *config) {
 	assert(f2fs_init_configuration_dl);
 	f2fs_init_configuration_dl(config);
 }
-void flush_sparse_buffs(void) {
-	assert(flush_sparse_buffs_dl);
-	return flush_sparse_buffs_dl();
-}
-void init_sparse_file(unsigned int block_size, int64_t len) {
-	assert(init_sparse_file_dl);
-	return init_sparse_file_dl(block_size, len);
-}
-void finalize_sparse_file(int fd) {
-	assert(finalize_sparse_file_dl);
-	return finalize_sparse_file_dl(fd);
-}
+
 int dlopenf2fs() {
 	void* f2fs_lib;
 
 	f2fs_lib = dlopen(F2FS_DYN_LIB, RTLD_NOW);
 	if (!f2fs_lib) {
-		return -1;
-	}
-	f2fs_format_device_dl = dlsym(f2fs_lib, "f2fs_format_device");
-	f2fs_init_configuration_dl = dlsym(f2fs_lib, "f2fs_init_configuration");
-	flush_sparse_buffs_dl = dlsym(f2fs_lib, "flush_sparse_buffs");
-	init_sparse_file_dl = dlsym(f2fs_lib, "init_sparse_file");
-	finalize_sparse_file_dl = dlsym(f2fs_lib, "finalize_sparse_file");
-	f2fs_config = dlsym(f2fs_lib, "config");
-	if (!f2fs_format_device_dl || !f2fs_init_configuration_dl ||
-			!flush_sparse_buffs_dl || !f2fs_config ||
-			!init_sparse_file_dl || !finalize_sparse_file_dl) {
 		return -1;
 	}
 	return 0;
